@@ -13,6 +13,7 @@ class Hotel(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     nombre = Column(String, nullable=False)
     ciudad = Column(String, nullable=False)
+    habitaciones = relationship("Habitacion", back_populates="hotel") 
 
     def __repr__(self):
         return f"<Hotel(id={self.id}, nombre='{self.nombre}', ciudad='{self.ciudad}')>"
