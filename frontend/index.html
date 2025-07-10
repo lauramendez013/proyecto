@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Lista de Hoteles</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      background-color: #f4f4f4;
+    }
+
+    h1, h2 {
+      color: #2c3e50;
+    }
+
+    input, button {
+      padding: 8px;
+      margin: 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      background-color: #3498db;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #2980b9;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: white;
+      margin-top: 20px;
+    }
+
+    th, td {
+      padding: 12px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+
+    th {
+      background-color: #2980b9;
+      color: white;
+    }
+
+    .form-container {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Lista de Hoteles</h1>
+
+  <div class="form-container">
+    <h2>Crear nuevo hotel</h2>
+    <input id="nombre" placeholder="Nombre del hotel">
+    <input id="ciudad" placeholder="Ciudad">
+    <button onclick="crearHotel()">Crear</button>
+  </div>
+
+  <h2>Hoteles registrados</h2>
+  <table id="tabla-hoteles">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Ciudad</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    async function cargarHoteles() {
+      const response = await fetch("http://127.0.0.1:8000/hoteles/");
+      const hoteles = await response.json();
+
+      const cuerpoTabla = document.querySelector("#tabla-hoteles tbody");
+      cuerpoTabla.innerHTML = "";
+
+      hoteles.forEach(hotel => {
+        const fila = document.createElement("tr");
+        fila.innerHTML = `
+          <td>${hotel.id}</td>
+          <td>${hotel.nombre}</td>
+          <td>${hotel.ciudad}</td>
+          <td>
+            <button onclick="eliminarHotel(${hotel.id})">Eliminar</button>
+          </td>
+        `;
+        cuerpoTabla.appendChild(fila);
+      });
+    }
+
+    async function crearHotel() {
+      const nombre = document.getElementById("nombre").value;
+      const ciudad = document.getElementById("ciudad").value;
+
+      if (!nombre || !ciudad) {
+        alert("Por favor llena ambos campos.");
+        return;
+      }
+
+      await fetch("http://127.0.0.1:8000/hoteles/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nombre, ciudad })
+      });
+
+      document.getElementById("nombre").value = "";
+      document.getElementById("ciudad").value = "";
+      cargarHoteles();
+    }
+
+    async function eliminarHotel(id) {
+      if (!confirm("¿Estás seguro de que deseas eliminar este hotel?")) return;
+
+      await fetch(`http://127.0.0.1:8000/hoteles/${id}`, {
+        method: "DELETE"
+      });
+
+      cargarHoteles();
+    }
+
+    window.onload = cargarHoteles;
+  </script>
+
+</body>
+</html>
